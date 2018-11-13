@@ -29,21 +29,48 @@ function simEuc(userID) {
     let eucObj = {
       compareObject: userB,
       sumOfSquaredEuclidean: 0,
-      results: [],
+      euclideanResults: [],
+      data: {
+        method: "Peason Correlation Score",
+        sum1: 0,
+        sum2: 0,
+        sum1sq: 0,
+        sum2sq: 0,
+        pSum: 0
+
+        getSum1sq() {
+          return (this.sum1)**2
+        },
+        getSum2sq() {
+          return (this.sum2)**2
+        },
+        getPsum () {
+          return
+        }
+      },
       getUsersInv() { return 1 / (1 + this.sumOfSquaredEuclidean)} // sqrt this ???
     }
+    // totalMoviesRated: this.totalMoviesRated += 1,
+    //         sum1: this.sum1 += movieA.Rating,
+    //         sum2: this.sum2 += movieB.Rating,
     for (let movieB of ratingsJSON) {
       for (let movieA of userMovies) {
         /** 
          * Users have rated the same move and pushes an object with results to the results array
         */
+        this.data.totalMoviesRated = this.totalMoviesRated += 1
+        this.data.sum1 = this.sum1 += movieA.Rating
+        this.data.sum2 = this.sum2 += movieB.Rating
+
+        // Euclidean Calc
         if (userB.UserID == movieB.UserID && movieB.Movie == movieA.Movie) {
           let resultObj = {
             movie: movieA.Movie,
-            eculideanScore: ((movieA.Rating - movieB.Rating)**2)
+            eculideanScore: ((movieA.Rating - movieB.Rating)**2),
+            
           }
           eucObj.sumOfSquaredEuclidean += ((movieA.Rating - movieB.Rating)**2)
-          eucObj.results.push(resultObj)
+          eucObj.euclideanResults.push(resultObj)
         }
       }
     }
