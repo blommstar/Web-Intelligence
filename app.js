@@ -7,6 +7,7 @@ const app = express()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
+// Main function
 function simEuc (userID) {
   let user = usersJSON.filter(a => a.UserID == userID)
   let userMovies = ratingsJSON.filter(a => a.UserID == userID)
@@ -25,7 +26,6 @@ function simEuc (userID) {
   user.results = []
   user.PCSResults = []
 
-  //
   for (let userB of usersJSON) {
     let pearsonObject = {
       method: 'Peason Correlation Score',
@@ -38,7 +38,8 @@ function simEuc (userID) {
       totalMoviesRated: 0,
       getPCS () {
         let num = this.pSum - (this.sum1 * this.sum2 / this.totalMoviesRated)
-        let den = Math.sqrt()
+        let den = Math.sqrt(((this.sum1sq - this.sum1 ** 2 / this.totalMoviesRated) * (this.sum2sq - this.sum2 ** 2 / this.totalMoviesRated)))
+        return num / den
       }
     }
 
@@ -46,20 +47,23 @@ function simEuc (userID) {
       compareObject: userB,
       sumOfSquaredEuclidean: 0,
       euclideanResults: [],
-
       getUsersInv () { return 1 / (1 + this.sumOfSquaredEuclidean) } // sqrt this ???
     }
 
-    // totalMoviesRated: this.totalMoviesRated += 1,
-    //         sum1: this.sum1 += movieA.Rating,
-    //         sum2: this.sum2 += movieB.Rating,
     for (let movieB of ratingsJSON) {
       for (let movieA of userMovies) {
         /**
          * Users have rated the same move and pushes an object with results to the results array
         */
+        pearsonObject.totalMoviesRated += 1
+        console.log(movieA)
 
-        // Euclidean Calc
+        pearsonObject.sum1 += Number(movieA.Rating)
+        pearsonObject.sum2 += Number(movieB.Rating)
+        pearsonObject.sum1sq += Number(movieA.Rating) ** 2
+        pearsonObject.sum2sq += Number(movieB.Rating) ** 2
+        pearsonObject.pSum += Number(movieA.Rating) * Number(movieB.Rating)
+
         if (userB.UserID == movieB.UserID && movieB.Movie == movieA.Movie) {
           // pearson calc
           pearsonObject.totalMoviesRated += 1
@@ -81,7 +85,6 @@ function simEuc (userID) {
     user.results.push(eucObj)
     user.PCSResults.push(pearsonObject)
   } // User loop ends
-  console.log(user)
 
   if (user.results.length == 0 && user.PCSResults.length == 0) {
     console.log('No matched found')
@@ -92,8 +95,27 @@ function simEuc (userID) {
 }
 
 /**
+ * Initialize data
+*/
+let data = []
+for (let user of usersJSON) {
+  let dataObj = {
+    user: user,
+    data: simEuc(user)
+  }
+  data.push(dataObj)
+}
+console.log(data[0].data.PCSResults[0].getPCS())
+
+/**
  * Routing
 */
+app.get('/api/data', (req, res) => {
+  res.status(200).send({
+    data: data
+  })
+})
+
 app.get('/api/ratings', (req, res) => {
   res.status(200).send({
     success: 'true',
