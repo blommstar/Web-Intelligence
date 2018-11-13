@@ -9,12 +9,53 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 function simEuc(userID) {
-  user = usersJSON.filter(a => a.UserID == userID),
-  userMovies = ratingsJSON.filter(a => a.UserID == userID)
+  let user = usersJSON.filter(a => a.UserID == userID)
+  let userMovies = ratingsJSON.filter(a => a.UserID == userID)
 
-  for (let userB of usersJSON) {
-    
+  /**  Sort list*/
+  user.getSummary = function () {
+    let summary = []
+    for (let user of this.results) {
+      summary.push([user.compareObject.UserName, user.getUsersInv()])
+    }
+    // return summary
   }
+  
+  // Results of eucscores
+  user.results = []
+
+  // 
+  for (let userB of usersJSON) {
+    let eucObj = {
+      compareObject: userB,
+      sumOfSquaredEuclidean: 0,
+      results: [],
+      getUsersInv() { return 1 / (1 + this.sumOfSquaredEuclidean)} // sqrt this ???
+    }
+    for (let movieB of ratingsJSON) {
+      for (let movieA of userMovies) {
+        /** 
+         * Users have rated the same move and pushes an object with results to the results array
+        */
+        if (userB.UserID == movieB.UserID && movieB.Movie == movieA.Movie) {
+          let resultObj = {
+            movie: movieA.Movie,
+            eculideanScore: ((movieA.Rating - movieB.Rating)**2)
+          }
+          eucObj.sumOfSquaredEuclidean += ((movieA.Rating - movieB.Rating)**2)
+          eucObj.results.push(resultObj)
+        }
+      }
+    }
+    user.results.push(eucObj)
+  } // User loop ends
+
+  if (!user.results) {
+    console.log('No matched found')
+    return 0
+  }
+  
+  return user
 }
 
 /** 
@@ -30,13 +71,15 @@ app.get('/api/ratings', (req, res) => {
 
 app.get('/api/ratings/:id', (req, res) => {
   const id = parseInt(req.params.id, 10);
-
+  let userIDObj = simEuc(id)
+  console.log(userIDObj.UserName);
+  
   res.status(200).send({
     statusCode: 200,
-    id: id,
-    user: usersJSON.filter(a => a.UserID == id),
-    ratedMovies: ratingsJSON.filter(a => a.UserID == id),
-    euclidean: 
+    user: userIDObj,
+    //user: usersJSON.filter(a => a.UserID == id),
+    //ratedMovies: ratingsJSON.filter(a => a.UserID == id),
+    euclideanScoreComparisons: userIDObj.getSummary() 
   });
 });
 
