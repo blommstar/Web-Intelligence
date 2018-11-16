@@ -51,39 +51,33 @@ function simEuc (userID) {
     }
 
     for (let movieB of ratingsJSON) {
+      // console.log(userMovies[0])
+
       for (let movieA of userMovies) {
         /**
          * Users have rated the same move and pushes an object with results to the results array
         */
-        pearsonObject.totalMoviesRated += 1
-        console.log(movieA)
-
-        pearsonObject.sum1 += Number(movieA.Rating)
-        pearsonObject.sum2 += Number(movieB.Rating)
-        pearsonObject.sum1sq += Number(movieA.Rating) ** 2
-        pearsonObject.sum2sq += Number(movieB.Rating) ** 2
-        pearsonObject.pSum += Number(movieA.Rating) * Number(movieB.Rating)
 
         if (userB.UserID == movieB.UserID && movieB.Movie == movieA.Movie) {
-          // pearson calc
           pearsonObject.totalMoviesRated += 1
           pearsonObject.sum1 += Number(movieA.Rating)
           pearsonObject.sum2 += Number(movieB.Rating)
           pearsonObject.sum1sq += Number(movieA.Rating) ** 2
           pearsonObject.sum2sq += Number(movieB.Rating) ** 2
           pearsonObject.pSum += Number(movieA.Rating) * Number(movieB.Rating)
+
           let resultObj = {
             movie: movieA.Movie,
             eculideanScore: ((movieA.Rating - movieB.Rating) ** 2)
 
           }
           eucObj.sumOfSquaredEuclidean += ((movieA.Rating - movieB.Rating) ** 2)
-          eucObj.euclideanResults.push(resultObj)
+          // eucObj.euclideanResults.push(resultObj)
         }
       }
+      user.PCSResults.push(pearsonObject)
     }
     user.results.push(eucObj)
-    user.PCSResults.push(pearsonObject)
   } // User loop ends
 
   if (user.results.length == 0 && user.PCSResults.length == 0) {
@@ -95,17 +89,18 @@ function simEuc (userID) {
 }
 
 /**
- * Initialize data
+ * Initialize data ************************************************
 */
-let data = []
+let usersData = []
 for (let user of usersJSON) {
   let dataObj = {
     user: user,
-    data: simEuc(user)
+    dataFor: simEuc(user.UserID)
   }
-  data.push(dataObj)
+  usersData.push(dataObj)
 }
-console.log(data[0].data.PCSResults[0].getPCS())
+
+console.log(usersData[0])
 
 /**
  * Routing
