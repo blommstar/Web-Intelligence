@@ -30,13 +30,27 @@ function euclidean (UserAID, UserBID) {
   }
 
   // Om inte samma film har betygsatts av A&B
-  if (counter === 0) {
+  if (counter == 0) {
     return 0
   }
 
   return 1 / (1 + sim)
 }
 
-console.log(euclidean(2, 4))
+function checkAgainstAll (user) {
+  let users = data.users
+  let result = []
+  for (let otherUser of users) {
+    let euclideanResultObject = {
+      otherUser: otherUser.UserName,
+      euclideanScore: euclidean(Number(user), Number(otherUser.UserID))
+    }
+    result.push(euclideanResultObject)
+  }
+  return result
+}
 
-module.exports = euclidean
+module.exports = {
+  euclidean: euclidean,
+  checkAgainstAll: checkAgainstAll
+}
