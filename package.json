@@ -18,7 +18,8 @@
   "homepage": "https://github.com/blommstar/Web-Intelligence#readme",
   "dependencies": {
     "express": "^4.16.4",
-    "papaparse": "^4.6.2"
+    "papaparse": "^4.6.2",
+    "tabulator-tables": "^4.1.2"
   },
   "devDependencies": {
     "eslint": "^5.9.0",

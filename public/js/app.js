@@ -3,8 +3,23 @@
  * API requests
 */
 // import tm from './tableMaker.js'
+
+// let Tabulator = require('tabulator-tables')
+// let ScoreGenerator = require('../../weightedScore')
+// import Tabulator from 'tabulator-tables'
+// import ScoreGenerator from '../../weightedScore'
 let ratings = null
 let users = null
+
+let testResults
+// console.log(testResults)
+
+fetch('http://localhost:5050/ratings')
+  .then(res => res.json())
+  .then(jsonData => {
+    testResults = jsonData
+    console.log(jsonData)
+  })
 
 fetch('http://localhost:5050/ratings')
   .then(res => res.json())
@@ -116,19 +131,18 @@ findButton.addEventListener('click', () => {
     eucArr = Array.from(a.euclidean).sort((a, b) => Number(a.euclideanScore) - Number(b.euclideanScore)).reverse()
     pcsArr = Array.from(a.pearson).sort((a, b) => Number(a.pearson) - Number(b.pearson)).reverse()
     document.getElementById('user').innerHTML = userName
-    console.dir(document.getElementById('Euclidean').checked)
-    if (document.getElementById('Euclidean').checked) { // Euclidean Print
+    // console.dir(document.getElementById('Euclidean').checked)
+
+    if (document.getElementById('Euclidean').checked) {
+      // Euclidean Print
       document.getElementById('data').innerHTML = tableMaker(eucArr)// JSON.stringify(a.euclidean)
       let similarPerson = eucArr[0].otherUser == userName ? eucArr[1].otherUser : eucArr[0].otherUser
-      let movieStr = `: ___`
       let theMovies = fetch(`http://localhost:5050/ratings/${a.user.UserID}`).then(res => res.json()).then(data => {
         // console.log(data.movies.ratings.sort((a, b) => a - b))
         let arr = Array.from(data.movies)
         arr.sort((a, b) => a.Rating - b.Rating).reverse()
         console.log(arr)
         for (let m of arr) {
-          // console.log(m.Movie)
-
           document.getElementById('data2').innerHTML += `${m.Movie} (${m.Rating}), `
         }
 
@@ -140,6 +154,26 @@ findButton.addEventListener('click', () => {
       that enjoys theses movies (From best high to low rated): `
     } else {
       document.getElementById('data').innerHTML = tableMaker(pcsArr)// Print Pearson
+      document.getElementById('data2').innerHTML = ''
+
+      let similarPerson = pcsArr[0].otherUser == userName ? pcsArr[1].otherUser : pcsArr[0].otherUser
+      let theMovies = fetch(`http://localhost:5050/ratings/${a.user.UserID}`).then(res => res.json()).then(data => {
+        // console.log(data.movies.ratings.sort((a, b) => a - b))
+        let arr = Array.from(data.movies)
+        arr.sort((a, b) => a.Rating - b.Rating).reverse()
+        console.log(arr)
+        for (let m of arr) {
+          document.getElementById('data2').innerHTML += `${m.Movie} (${m.Rating}), `
+        }
+
+        return data.movies
+      })
+      console.log(theMovies.movies)
+
+      document.getElementById('data2').innerHTML = `Similar in taste to you is ${similarPerson}
+      that enjoys theses movies (From best high to low rated): `
+
+      console.log('in pcs')
     }
     // for (let aRate of a.euclidean) {
     //   console.log(aRate)

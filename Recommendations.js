@@ -1,0 +1,3 @@
+class Recommendations {
+  constructor() {}s
+}

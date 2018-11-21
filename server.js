@@ -2,10 +2,44 @@ let express = require('express')
 let data = require('./data')
 let euclidean = require('./euclidean')
 let pearson = require('./pearson')
+let ScoreGenerator = require('./weightedScore')
+let Tabulator = require('tabulator-tables')
 
 let app = express()
 
 app.use(express.static('public'))
+
+let scores = new ScoreGenerator()
+scores.getAllResults()
+// console.log(scores.results)
+
+app.get('/results', (req, res, next) => { // /results
+  res.send(scores.results)
+  // res.send(data.users)
+})
+
+app.get('/results/:id', (req, res, next) => { // /results
+  let cacheScore = scores
+  const id = parseInt(req.params.id, 10)
+  for (let user of data.users) {
+    for (let obj of cacheScore.results) {
+      if (user.UserID == id) {
+        console.log(obj.movie.Movie)
+
+        // for (let movie of obj.movie) {
+        //   console.log([movie.Movie, obj.euclideanScore])
+        // }
+      }
+    }
+  }
+  for (let obj of cacheScore.results) {
+    if (obj.UserID == id) {
+      console.log(obj)
+    }
+  }
+
+  res.send(cacheScore.results[0].movie.Movie)
+})
 
 app.get('/users', (req, res, next) => {
   res.send(data.users)
