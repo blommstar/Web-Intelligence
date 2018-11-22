@@ -5,7 +5,7 @@ class R {
     this.userA = userA || { UserName: 'Lisa', UserID: '1' }
     this.users = data.users
     this.ratings = data.ratings
-    this.recommendationData = this.getRecommended()
+    this.meta = []
   }
 
   euclidean (userA, userB) {
@@ -24,10 +24,8 @@ class R {
 
   weightedScore () {
     let results = []
+    let onlyMovies = []
     for (let user of this.users) {
-      if (this.userA.UserID == user.UserID) {
-        continue
-      }
       let obj = {
         user: user.UserName,
         euclidean: this.euclidean(this.userA, user),
@@ -36,66 +34,94 @@ class R {
       for (let movie of this.ratings) {
         if (movie.UserID == user.UserID) {
           obj.moviesWeighted.push({ movieName: movie.Movie, weightedScore: (movie.Rating * obj.euclidean) })
+          onlyMovies.push({ movieName: movie.Movie, weightedScore: (movie.Rating * obj.euclidean) })
         }
       }
       results.push(obj)
     }
-    return results
+    this.meta = results
+    return onlyMovies
   }
 
   getRecommended () {
     let data = this.weightedScore()
-    let recommendationData = []
-    // Sum weighted score for each movie
-    for (let movie of this.ratings) { // Movie loop
-      let movObj = {
-        movie: movie.Movie,
-        sumOfAllWeighted: 0,
-        sumOfAllSimScores: 0,
-        total: 0
-      }
-      for (let user of data) {
-        let movies = Array.from(user.moviesWeighted)
-        for (let ratedMovie of movies) {
-          if (movie.Movie == ratedMovie.movieName) {
-            movObj.sumOfAllWeighted += ratedMovie.weightedScore
+
+    // Get userA movies
+    let userAMovies = this.ratings.filter(a => a.UserID == this.userA.UserID)
+    let results = userAMovies.map((curr, i, arr) => {
+      let obj = {
+        movie: curr.Movie,
+        sum: data.reduce((a, c) => {
+          if (curr.Movie == c.movieName) {
+            return a + c.weightedScore
           }
-        }
-        movObj.sumOfAllSimScores += user.euclidean
+          return a
+        }, 0),
+        sim: this.meta.reduce((a, c, i, arr) => {
+          // console.log(curr.weightedScore)
+
+          for (let mov of Array.from(c.moviesWeighted)) {
+            if (mov.movieName == curr.Movie) {
+              return a + c.euclidean
+            }
+          }
+          return a
+        }, 0)
       }
-      movObj.total = movObj.sumOfAllWeighted / movObj.sumOfAllSimScores
-      recommendationData.push(movObj)
-    }
+      obj.total = obj.sum / obj.sim
+      return obj
+    })
+    console.log(results)
 
-    return recommendationData
-  }
-  bestMatches () {
-    let data = this.recommendationData
-    // data.sort((a, b) => a.total - b.total)
-    let merged = []
+    // console.log(userAMovies)
 
-    for (let movie of data) {
+    // match score against movie and add all together
+    // for (let obj of data) {
+    //   let resObj = {}
+    //   resObj.movie = ''
+    //   resObj.sum = 0
+    //   for (let movie of Array.from(obj.moviesWeighted)) {
+    //     resObj.movie = movie.movieName
+    //     for (let uAMovie of userAMovies) {
+    //       if (uAMovie.Movie == movie.movieName) {
+    //         resObj.sum += movie.weightedScore
+    //       }
+    //     }
+    //   }
+    //   results.push(resObj)
+    //   return results
+    // }
 
-    }
+    // Sum weighted score for each movie
+    // for (let movie of this.ratings) { // Movie loop
+    //   let sumWeight = 0
+    //   if (movie.Movie == this.userA.Movie) {
 
-    if (merged.length == 0) {
-      merged.push(data[0])
-    }
+    //   }
 
-    for (let mov of merged) {
-      if (movie.movie == mov.movie) {
-        // mov.movie = movie.movie
-        mov.sumOfAllWeighted += movie.sumOfAllWeighted
-        mov.sumOfAllSimScores += movie.sumOfAllSimScores
-        mov.total += movie.total
-      } else {
-        merged.push(movie)
-      }
-      break
-    }
-    console.log(merged)
+    // let movObj = {
+    //   movie: movie.Movie,
+    //   sumOfAllWeighted: 0,
+    //   sumOfAllSimScores: 0,
+    //   total: 0
+    // }
+
+    // for (let user of data) {
+    //   let movies = Array.from(user.moviesWeighted)
+    //   for (let ratedMovie of movies) {
+    //     if (movie.Movie == ratedMovie.movieName) {
+    //       movObj.sumOfAllWeighted += ratedMovie.weightedScore
+    //     }
+    //   }
+    //   movObj.sumOfAllSimScores += user.euclidean
+    // }
+    // movObj.total = movObj.sumOfAllWeighted / movObj.sumOfAllSimScores
+    // recommendationData.push(movObj)
+    // }
+
+    // return recommendationData
   }
 }
 
 let aa = new R()
-aa.bestMatches()
+console.log(aa.getRecommended())
