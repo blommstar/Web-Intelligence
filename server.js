@@ -4,6 +4,7 @@ let euclidean = require('./euclidean')
 let pearson = require('./pearson')
 let ScoreGenerator = require('./weightedScore')
 let Tabulator = require('tabulator-tables')
+let R = require('./R')
 
 let app = express()
 
@@ -19,26 +20,16 @@ app.get('/results', (req, res, next) => { // /results
 })
 
 app.get('/results/:id', (req, res, next) => { // /results
-  let cacheScore = scores
   const id = parseInt(req.params.id, 10)
+  let userA = null
   for (let user of data.users) {
-    for (let obj of cacheScore.results) {
-      if (user.UserID == id) {
-        console.log(obj.movie.Movie)
-
-        // for (let movie of obj.movie) {
-        //   console.log([movie.Movie, obj.euclideanScore])
-        // }
-      }
+    if (id == user.UserID) {
+      userA = user
     }
   }
-  for (let obj of cacheScore.results) {
-    if (obj.UserID == id) {
-      console.log(obj)
-    }
-  }
+  userA = new R(userA)
 
-  res.send(cacheScore.results[0].movie.Movie)
+  res.send(userA.getRecommended())
 })
 
 app.get('/users', (req, res, next) => {
@@ -71,7 +62,6 @@ app.get('/ratings/:id', (req, res, next) => {
   let movies = []
 
   for (let movie of data.ratings) {
-    console.log(movie)
     if (Number(movie.UserID) == id) {
       for (let user of data.users) {
         if (Number(user.UserID) == id) {

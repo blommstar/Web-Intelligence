@@ -95,7 +95,7 @@ class ScoreGenerator {
         }
       }
     }
-    console.dir(userResults)
+    // console.dir(userResults)
   }
 }
 

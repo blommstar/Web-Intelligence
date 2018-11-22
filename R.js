@@ -44,6 +44,7 @@ class R {
   }
 
   getRecommended () {
+    debugger
     let data = this.weightedScore()
 
     // Get userA movies
@@ -71,7 +72,8 @@ class R {
       obj.total = obj.sum / obj.sim
       return obj
     })
-    console.log(results)
+    return results.sort((a, b) => a.total - b.total).reverse()
+    // console.log(results)
 
     // console.log(userAMovies)
 
@@ -123,5 +125,6 @@ class R {
   }
 }
 
-let aa = new R()
-console.log(aa.getRecommended())
+module.exports = R
+// let aa = new R()
+// console.log(aa.getRecommended())
