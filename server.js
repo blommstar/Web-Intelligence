@@ -19,16 +19,28 @@ app.get('/results', (req, res, next) => { // /results
   // res.send(data.users)
 })
 
+// app.get('/results/:id', (req, res, next) => { // /results
+//   const id = parseInt(req.params.id, 10)
+//   let userA = null
+//   for (let user of data.users) {
+//     if (id == user.UserID) {
+//       userA = user
+//     }
+//   }
+//   userA = new R(userA)
+//   res.send(userA.getRecommended())
+// })
+
 app.get('/results/:id', (req, res, next) => { // /results
   const id = parseInt(req.params.id, 10)
   let userA = null
   for (let user of data.users) {
     if (id == user.UserID) {
       userA = user
+      break
     }
   }
   userA = new R(userA)
-
   res.send(userA.getRecommended())
 })
 

@@ -44,34 +44,58 @@ class R {
   }
 
   getRecommended () {
-    debugger
     let data = this.weightedScore()
 
     // Get userA movies
     let userAMovies = this.ratings.filter(a => a.UserID == this.userA.UserID)
+
+    // let results = userAMovies.map((curr, i, arr) => {
+    //   let obj = {
+    //     movie: curr.Movie,
+    //     sum: data.reduce((a, c) => {
+    //       if (curr.Movie == c.movieName) {
+    //         return a + c.weightedScore
+    //       }
+    //       return a
+    //     }, 0),
+    //     sim: this.meta.reduce((a, c, i, arr) => {
+    //       // console.log(curr.weightedScore)
+
+    //       for (let mov of Array.from(c.moviesWeighted)) {
+    //         if (mov.movieName == curr.Movie) {
+    //           return a + c.euclidean
+    //         }
+    //       }
+    //       return a
+    //     }, 0)
+    //   }
+    //   obj.total = (obj.sum / obj.sim)
+    //   return obj
+    // })
+
     let results = userAMovies.map((curr, i, arr) => {
       let obj = {
         movie: curr.Movie,
-        sum: data.reduce((a, c) => {
-          if (curr.Movie == c.movieName) {
-            return a + c.weightedScore
-          }
-          return a
-        }, 0),
-        sim: this.meta.reduce((a, c, i, arr) => {
-          // console.log(curr.weightedScore)
-
-          for (let mov of Array.from(c.moviesWeighted)) {
-            if (mov.movieName == curr.Movie) {
-              return a + c.euclidean
-            }
-          }
-          return a
-        }, 0)
+        sum: 0,
+        sim: 0
       }
-      obj.total = obj.sum / obj.sim
+      let reducer = this.meta.reduce((a, c, i, arr) => {
+        // console.log(curr.weightedScore)
+
+        for (let mov of Array.from(c.moviesWeighted)) {
+          if (mov.movieName == curr.Movie) {
+            obj.sum += mov.weightedScore
+            obj.sim += c.euclidean
+            // return a + c.euclidean
+          }
+        }
+        return a
+      }, 0)
+
+      obj.total = (obj.sum / obj.sim)
       return obj
     })
+
     return results.sort((a, b) => a.total - b.total).reverse()
     // console.log(results)
 
